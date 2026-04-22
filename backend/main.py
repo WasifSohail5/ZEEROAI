@@ -6,7 +6,6 @@ import os
 from contextlib import asynccontextmanager
 
 import sys
-import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from lecture import generate_lecture_core
@@ -17,10 +16,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Zeero AI Lecture Generator API", lifespan=lifespan)
 
-# Allow requests from frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # For production, set to your frontend domain
+    allow_origins=[
+        "https://zeeroai.vercel.app",        # tumhara Vercel URL — baad mein update karna
+        "http://localhost:3000",               # local dev
+        "http://localhost:3001",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,12 +38,17 @@ class LectureResponse(BaseModel):
     status: str
     message: str
 
+@app.get("/")
+async def root():
+    return {"status": "ZEERO AI Backend is running"}
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 @app.post("/api/generate-lecture", response_model=LectureResponse)
 async def generate_lecture(request: LectureRequest, background_tasks: BackgroundTasks):
     try:
-        # In a real app we might want to return an ID and track status,
-        # but here we'll just run it as a background task. 
-        # Output filename could be randomized or based on topic later.
         output_filename = f"lecture_{request.topic.replace(' ', '_')}.mp4"
         background_tasks.add_task(
             generate_lecture_core,
@@ -52,7 +59,7 @@ async def generate_lecture(request: LectureRequest, background_tasks: Background
             request.user_id
         )
         return LectureResponse(
-            status="success", 
+            status="success",
             message=f"Lecture generation for '{request.topic}' started in the background."
         )
     except Exception as e:
@@ -60,4 +67,6 @@ async def generate_lecture(request: LectureRequest, background_tasks: Background
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    # Port 7860 for Hugging Face Spaces
+    port = int(os.environ.get("PORT", 7860))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
