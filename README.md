@@ -1,4 +1,4 @@
-# Zero AI
+# Zeero AI
 
 This project contains a Next.js frontend and a Python backend.
 
