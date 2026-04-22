@@ -79,8 +79,7 @@ export default function CreateLecturePage() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8001"
-      const response = await fetch(`${backendUrl}/api/generate-lecture`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8001'}/api/generate-lecture`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
