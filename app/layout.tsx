@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
+import { Toaster as SonnerToaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
@@ -179,6 +180,7 @@ export default function RootLayout({
         >
           {children}
           <Toaster />
+          <SonnerToaster />
         </ThemeProvider>
         <Analytics />
       </body>

@@ -188,11 +188,6 @@ TEMPLATES = {
 """
 }
 
-
-
-# =========================
-# YOUR CAPTURE LOGIC (INTEGRATED)
-# =========================
 def capture_all_slides_integrated(html_file, output_folder="exported_frames"):
     chrome_options = Options()
     chrome_options.add_argument("--headless=new")
@@ -353,42 +348,105 @@ async def generate_lecture_core(topic: str, sections: list[str], template_name: 
     except Exception as e:
         print(f"Failed to upload presentation HTML: {e}")
 
-    # 5. Build Video
-    print("\n🎬 Building Video...")
-    clips = []
-    for i, img_p in enumerate(image_paths):
-        aud_p, duration = audio_data[i]
-        img_clip = ImageClip(img_p).with_duration(duration + 0.5)
-        aud_clip = AudioFileClip(aud_p)
-        clips.append(img_clip.with_audio(aud_clip))
-
-    final = concatenate_videoclips(clips, method="compose")
-    final.write_videofile(output_filename, fps=24, codec="libx264")
-    
-    # Upload final video
-    try:
-        video_url = upload_to_cloudinary(output_filename, "video", f"zeero/lectures/{lecture_id}/video/")
-    except Exception as e:
-        print(f"Failed to upload final video: {e}")
-    
-    # Save to Supabase (only if user provided)
-    if user_id:
-        supabase_url = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
-        supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-        if supabase_url and supabase_key:
+    # 4.5 Insert "processing" record into Supabase immediately
+    import time
+    from supabase import create_client
+    supabase_url = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+    supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    supabase = None
+    if user_id and supabase_url and supabase_key:
+        try:
             supabase = create_client(supabase_url, supabase_key)
-            supabase.table("lectures").upsert({
-                "id": lecture_id,
+            supabase.table("lectures").insert({
+                "id": str(lecture_id),
                 "user_id": user_id,
                 "title": topic,
+                "prompt": topic,
                 "image_urls": image_urls,
                 "audio_urls": audio_urls,
                 "ppt_url": ppt_url,
-                "video_url": video_url,
-                "status": "ready"
+                "thumbnail_url": image_urls[0] if image_urls else None,
+                "video_url": None,
+                "status": "processing"
             }).execute()
-        else:
-            print("⚠️ Supabase credentials missing. Lecture saved to cloudinary but not database.")
+            print("✅ Inserted processing lecture record into Supabase.")
+        except Exception as e:
+            print(f"⚠️ Failed to insert processing state: {e}")
+
+    # 5. Build Video
+    print("\n🎬 Building Video...")
+    clips = []
+    
+    try:
+        #from moviepy import ImageClip, AudioFileClip, concatenate_videoclips
+        import cloudinary.uploader
+        for i, img_p in enumerate(image_paths):
+            aud_p, duration = audio_data[i]
+            img_clip = ImageClip(img_p).with_duration(duration + 0.5)
+            aud_clip = AudioFileClip(aud_p)
+            clips.append(img_clip.with_audio(aud_clip))
+
+        final = concatenate_videoclips(clips, method="compose")
+        final.write_videofile(output_filename, fps=24, codec="libx264")
+        
+        # Upload final video
+        video_url = None
+        for attempt in range(3):
+            try:
+                print(f"Uploading final video to Cloudinary (Attempt {attempt+1}/3)...")
+                result = cloudinary.uploader.upload(
+                    output_filename,
+                    resource_type="video",
+                    folder=f"zeero/lectures/{lecture_id}/video/",
+                    chunk_size=6000000
+                )
+                video_url = result.get("secure_url")
+                print("✅ Video uploaded successfully!")
+                break
+            except Exception as e:
+                print(f"⚠️ Video upload failed (attempt {attempt+1}/3): {e}")
+                if attempt < 2:
+                    time.sleep(5)
+                else:
+                    video_url = None
+    finally:
+        # CLEANUP: Delete all local generated files so nothing is saved permanently on disk
+        print("🧹 Cleaning up local temporary files...")
+        
+        # Delete generated audios
+        for aud_path, _ in audio_data:
+            if os.path.exists(aud_path):
+                os.remove(aud_path)
+                
+        # Delete HTML
+        if os.path.exists(master_html_path):
+            os.remove(master_html_path)
+            
+        # Delete individual images
+        for img_path in image_paths:
+            if os.path.exists(img_path):
+                os.remove(img_path)
+                
+        # Delete exported_frames folder entirely
+        import shutil
+        if os.path.exists("exported_frames"):
+            shutil.rmtree("exported_frames", ignore_errors=True)
+            
+        # Delete the final mp4
+        if os.path.exists(output_filename):
+            os.remove(output_filename)
+
+    
+    # Save to Supabase completion
+    if supabase and user_id:
+        try:
+            supabase.table("lectures").update({
+                "video_url": video_url,
+                "status": "ready" if video_url else "failed"
+            }).eq("id", str(lecture_id)).execute()
+            print("✅ Lecture updated to ready state in Supabase.")
+        except Exception as e:
+            print(f"⚠️ Failed to update ready state: {e}")
 
     print("✅ Finished!")
     return os.path.abspath(output_filename)

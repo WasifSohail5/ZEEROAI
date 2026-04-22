@@ -1,33 +1,33 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Users, Video, MessageSquare, ArrowRight, Zap } from "lucide-react"
+import { BookOpen, GraduationCap, Star, ArrowRight, Zap } from "lucide-react"
 
 const features = [
   {
-    icon: Video,
-    title: "Live Study Rooms",
-    desc: "Join real-time video sessions with other learners on the same topic",
-    color: "#10b981",
+    icon: GraduationCap,
+    title: "Structured Courses",
+    desc: "Full learning paths for IELTS, coding, and more — with lectures, quizzes, and progress tracking",
+    color: "#f59e0b",
     delay: "0ms",
   },
   {
-    icon: MessageSquare,
-    title: "Collaborative Q&A",
-    desc: "Ask and answer questions together — learn faster as a group",
-    color: "#3b82f6",
+    icon: Star,
+    title: "Expert Content",
+    desc: "AI-curated courses built on verified academic sources — not random internet content",
+    color: "#ec4899",
     delay: "120ms",
   },
   {
-    icon: Users,
-    title: "Study Groups",
-    desc: "Create or join groups for your courses — scheduled or instant sessions",
-    color: "#f59e0b",
+    icon: BookOpen,
+    title: "Learn at Your Pace",
+    desc: "Enroll once, access forever — resume anytime from where you left off",
+    color: "#8b5cf6",
     delay: "240ms",
   },
 ]
 
-export default function MeetingsPage() {
+export default function CoursesPage() {
   const [progress, setProgress] = useState(0)
   const [visible, setVisible] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -39,8 +39,8 @@ export default function MeetingsPage() {
       const interval = setInterval(() => {
         p += 1
         setProgress(p)
-        if (p >= 45) clearInterval(interval)
-      }, 28)
+        if (p >= 55) clearInterval(interval)
+      }, 25)
       return () => clearInterval(interval)
     }, 500)
     return () => clearTimeout(timer)
@@ -60,7 +60,7 @@ export default function MeetingsPage() {
       r: number; alpha: number; color: string
     }[] = []
 
-    const colors = ["#10b981", "#3b82f6", "#f59e0b"]
+    const colors = ["#f59e0b", "#ec4899", "#8b5cf6"]
     for (let i = 0; i < 55; i++) {
       particles.push({
         x: Math.random() * canvas.width,
@@ -105,19 +105,19 @@ export default function MeetingsPage() {
 
       {/* Glow blobs */}
       <div
-        className="pointer-events-none absolute left-1/3 top-1/3 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-10 blur-3xl"
+        className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-10 blur-3xl"
         style={{
-          width: 480,
-          height: 480,
-          background: "radial-gradient(circle, #10b981 0%, #3b82f6 50%, transparent 80%)",
+          width: 500,
+          height: 500,
+          background: "radial-gradient(circle, #f59e0b 0%, #ec4899 50%, transparent 80%)",
         }}
       />
       <div
-        className="pointer-events-none absolute bottom-10 right-10 rounded-full opacity-[0.07] blur-3xl"
+        className="pointer-events-none absolute bottom-10 left-10 rounded-full opacity-[0.07] blur-3xl"
         style={{
-          width: 320,
-          height: 320,
-          background: "radial-gradient(circle, #f59e0b, transparent 70%)",
+          width: 300,
+          height: 300,
+          background: "radial-gradient(circle, #8b5cf6, transparent 70%)",
         }}
       />
 
@@ -135,7 +135,7 @@ export default function MeetingsPage() {
           <span
             className="absolute inset-0 rounded-full"
             style={{
-              background: "radial-gradient(circle, #10b981, transparent 70%)",
+              background: "radial-gradient(circle, #f59e0b, transparent 70%)",
               opacity: 0.18,
               animation: "ping 2.6s cubic-bezier(0,0,0.2,1) infinite",
               transform: "scale(1.6)",
@@ -144,23 +144,23 @@ export default function MeetingsPage() {
           <span
             className="absolute inset-0 rounded-full"
             style={{
-              background: "radial-gradient(circle, #3b82f6, transparent 70%)",
+              background: "radial-gradient(circle, #ec4899, transparent 70%)",
               opacity: 0.09,
-              animation: "ping 2.6s cubic-bezier(0,0,0.2,1) infinite 0.7s",
+              animation: "ping 2.6s cubic-bezier(0,0,0.2,1) infinite 0.8s",
               transform: "scale(2.3)",
             }}
           />
           <div
             className="relative flex h-24 w-24 items-center justify-center rounded-2xl"
             style={{
-              background: "linear-gradient(135deg, rgba(16,185,129,0.12), rgba(59,130,246,0.12))",
-              border: "1px solid rgba(16,185,129,0.25)",
-              boxShadow: "0 0 40px rgba(16,185,129,0.15), inset 0 1px 0 rgba(255,255,255,0.04)",
+              background: "linear-gradient(135deg, rgba(245,158,11,0.12), rgba(236,72,153,0.12))",
+              border: "1px solid rgba(245,158,11,0.25)",
+              boxShadow: "0 0 40px rgba(245,158,11,0.15), inset 0 1px 0 rgba(255,255,255,0.04)",
             }}
           >
-            <Users
+            <BookOpen
               className="h-11 w-11"
-              style={{ color: "#10b981", filter: "drop-shadow(0 0 12px rgba(16,185,129,0.6))" }}
+              style={{ color: "#f59e0b", filter: "drop-shadow(0 0 12px rgba(245,158,11,0.6))" }}
             />
           </div>
         </div>
@@ -169,9 +169,9 @@ export default function MeetingsPage() {
         <div
           className="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium"
           style={{
-            background: "rgba(16,185,129,0.08)",
-            border: "1px solid rgba(16,185,129,0.2)",
-            color: "#34d399",
+            background: "rgba(245,158,11,0.08)",
+            border: "1px solid rgba(245,158,11,0.2)",
+            color: "#fcd34d",
             letterSpacing: "0.08em",
           }}
         >
@@ -184,15 +184,15 @@ export default function MeetingsPage() {
           className="mb-4 text-5xl font-bold tracking-tight sm:text-6xl"
           style={{ color: "hsl(var(--foreground))", lineHeight: 1.1 }}
         >
-          Meeting{" "}
+          My{" "}
           <span
             style={{
-              background: "linear-gradient(90deg, #10b981, #3b82f6, #f59e0b)",
+              background: "linear-gradient(90deg, #f59e0b, #ec4899, #8b5cf6)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
           >
-            Rooms
+            Courses
           </span>
         </h1>
 
@@ -200,14 +200,14 @@ export default function MeetingsPage() {
           className="mb-3 max-w-md text-lg"
           style={{ color: "hsl(var(--muted-foreground))" }}
         >
-          Collaborative learning spaces are on their way
+          Full structured courses are coming your way
         </p>
         <p
           className="mb-10 max-w-lg text-sm leading-relaxed"
           style={{ color: "hsl(var(--muted-foreground))", opacity: 0.7 }}
         >
-          Real-time virtual rooms where students and educators meet, collaborate,
-          and learn together — live video, group Q&A, and shared sessions all in one place.
+          Enroll in complete AI-generated courses like IELTS prep, coding bootcamps,
+          and more — with live Q&A, quizzes after every lecture, and a certificate at the end.
         </p>
 
         {/* Progress bar */}
@@ -220,8 +220,8 @@ export default function MeetingsPage() {
               className="h-full rounded-full"
               style={{
                 width: `${progress}%`,
-                background: "linear-gradient(90deg, #10b981, #3b82f6)",
-                boxShadow: "0 0 8px rgba(16,185,129,0.5)",
+                background: "linear-gradient(90deg, #f59e0b, #ec4899)",
+                boxShadow: "0 0 8px rgba(245,158,11,0.5)",
                 transition: "width 0.05s linear",
               }}
             />
@@ -233,7 +233,7 @@ export default function MeetingsPage() {
             >
               Feature in development
             </p>
-            <p className="text-xs font-medium" style={{ color: "#34d399" }}>
+            <p className="text-xs font-medium" style={{ color: "#fcd34d" }}>
               {progress}%
             </p>
           </div>
@@ -243,17 +243,17 @@ export default function MeetingsPage() {
         <button
           className="group mt-6 inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-medium transition-all duration-200"
           style={{
-            border: "1px solid rgba(16,185,129,0.25)",
-            color: "#6ee7b7",
-            background: "rgba(16,185,129,0.05)",
+            border: "1px solid rgba(245,158,11,0.25)",
+            color: "#fde68a",
+            background: "rgba(245,158,11,0.05)",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(16,185,129,0.12)"
-            e.currentTarget.style.borderColor = "rgba(16,185,129,0.4)"
+            e.currentTarget.style.background = "rgba(245,158,11,0.12)"
+            e.currentTarget.style.borderColor = "rgba(245,158,11,0.4)"
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = "rgba(16,185,129,0.05)"
-            e.currentTarget.style.borderColor = "rgba(16,185,129,0.25)"
+            e.currentTarget.style.background = "rgba(245,158,11,0.05)"
+            e.currentTarget.style.borderColor = "rgba(245,158,11,0.25)"
           }}
         >
           Notify me when ready

@@ -17,16 +17,18 @@ import {
   HelpCircle,
   Menu,
   Plus,
-  Zap
+  Zap,
+  PanelLeftClose,
+  PanelLeftOpen
 } from "lucide-react"
 import Image from "next/image"
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "My Lectures", href: "/dashboard/lectures", icon: Video },
-  { name: "Meeting Rooms", href: "/dashboard/meetings", icon: Users },
-  { name: "AI Tutor", href: "/dashboard/tutor", icon: MessageSquare },
-  { name: "Learning Path", href: "/dashboard/learning", icon: BookOpen },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, comingSoon: false },
+  { name: "My Lectures", href: "/dashboard/lectures", icon: Video, comingSoon: false },
+  { name: "My Courses", href: "/dashboard/courses", icon: BookOpen, comingSoon: true },
+  { name: "AI Tutor", href: "/dashboard/tutor", icon: MessageSquare, comingSoon: true },
+  { name: "Meeting Rooms", href: "/dashboard/meetings", icon: Users, comingSoon: true },
 ]
 
 const secondaryNavigation = [
@@ -34,27 +36,48 @@ const secondaryNavigation = [
   { name: "Help & Support", href: "/help", icon: HelpCircle },
 ]
 
-function SidebarContent({ pathname }: { pathname: string }) {
+function SidebarContent({ 
+  pathname, 
+  isCollapsed,
+  setIsCollapsed 
+}: { 
+  pathname: string
+  isCollapsed: boolean
+  setIsCollapsed?: (val: boolean) => void
+}) {
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col overflow-x-hidden">
       {/* Logo */}
-      <div className="flex h-16 items-center gap-2 border-b border-border px-6">
-        <Image
-          src="/images/zeero-logo.png"
-          alt="ZEERO AI"
-          width={36}
-          height={36}
-          className="h-9 w-9"
-        />
-        <span className="text-lg font-bold text-foreground">ZEERO AI</span>
+      <div className={cn("flex h-16 items-center border-b border-border px-6", isCollapsed ? "justify-center px-0" : "gap-2 justify-between")}>
+        <div className="flex items-center gap-2">
+          <Image
+            src="/images/zeero-logo.png"
+            alt="ZEERO AI"
+            width={36}
+            height={36}
+            className="h-9 w-9 shrink-0"
+          />
+          {!isCollapsed && <span className="text-lg font-bold text-foreground overflow-hidden whitespace-nowrap">ZEERO AI</span>}
+        </div>
+        {setIsCollapsed && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn("h-8 w-8 text-muted-foreground hover:text-foreground", isCollapsed && "mt-2 absolute -right-4 top-16 bg-background border hidden sm:flex")}
+            onClick={() => setIsCollapsed(!isCollapsed)}
+          >
+            {isCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+            <span className="sr-only">Toggle Sidebar</span>
+          </Button>
+        )}
       </div>
 
       {/* Create Button */}
-      <div className="p-4">
-        <Button className="w-full gap-2" asChild>
+      <div className="p-4 flex justify-center">
+        <Button className={cn("gap-2", isCollapsed ? "w-10 h-10 px-0 rounded-full" : "w-full")} asChild>
           <Link href="/dashboard/create">
-            <Plus className="h-4 w-4" />
-            Generate Lecture
+            <Plus className="h-4 w-4 shrink-0" />
+            {!isCollapsed && <span className="overflow-hidden whitespace-nowrap">Generate Lecture</span>}
           </Link>
         </Button>
       </div>
@@ -67,15 +90,17 @@ function SidebarContent({ pathname }: { pathname: string }) {
             <Link
               key={item.name}
               href={item.href}
+              title={isCollapsed ? item.name : undefined}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center rounded-lg py-2.5 text-sm font-medium transition-colors",
+                isCollapsed ? "justify-center px-0" : "gap-3 px-3",
                 isActive
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              <item.icon className="h-5 w-5" />
-              {item.name}
+              <item.icon className="h-5 w-5 shrink-0" />
+              {!isCollapsed && <span className="overflow-hidden whitespace-nowrap">{item.name}</span>}
             </Link>
           )
         })}
@@ -89,15 +114,17 @@ function SidebarContent({ pathname }: { pathname: string }) {
             <Link
               key={item.name}
               href={item.href}
+              title={isCollapsed ? item.name : undefined}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center rounded-lg py-2.5 text-sm font-medium transition-colors",
+                isCollapsed ? "justify-center px-0" : "gap-3 px-3",
                 isActive
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              <item.icon className="h-5 w-5" />
-              {item.name}
+              <item.icon className="h-5 w-5 shrink-0" />
+              {!isCollapsed && <span className="overflow-hidden whitespace-nowrap">{item.name}</span>}
             </Link>
           )
         })}
@@ -106,15 +133,32 @@ function SidebarContent({ pathname }: { pathname: string }) {
   )
 }
 
-export default function DashboardSidebar({ user }: { user: User }) {
+export default function DashboardSidebar({ 
+  user,
+  isCollapsed = false,
+  setIsCollapsed
+}: { 
+  user: User
+  isCollapsed?: boolean
+  setIsCollapsed?: (val: boolean) => void 
+}) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
 
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-50 hidden w-72 border-r border-border bg-card lg:block">
-        <SidebarContent pathname={pathname} />
+      <aside 
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 hidden border-r border-border bg-card lg:block transition-all duration-300",
+          isCollapsed ? "w-16" : "w-72"
+        )}
+      >
+        <SidebarContent 
+          pathname={pathname} 
+          isCollapsed={isCollapsed} 
+          setIsCollapsed={setIsCollapsed} 
+        />
       </aside>
 
       {/* Mobile Sidebar */}
@@ -130,7 +174,11 @@ export default function DashboardSidebar({ user }: { user: User }) {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-72 p-0">
-          <SidebarContent pathname={pathname} />
+          <SidebarContent 
+            pathname={pathname} 
+            isCollapsed={false} 
+            // no setIsCollapsed for mobile
+          />
         </SheetContent>
       </Sheet>
     </>
