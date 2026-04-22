@@ -1,0 +1,6 @@
+openai
+requests
+numpy
+jinja2
+selenium
+moviepy
